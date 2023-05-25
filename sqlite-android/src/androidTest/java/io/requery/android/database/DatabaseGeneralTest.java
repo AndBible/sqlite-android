@@ -1047,6 +1047,24 @@ public class DatabaseGeneralTest {
         }
     }
 
+    @SmallTest
+    @Test
+    public void testAttach() {
+        String attachedDb1File = mDatabase.getPath() + "1";
+        String attachedDb2File = mDatabase.getPath() + "2";
+        SQLiteDatabase db1 = SQLiteDatabase.openOrCreateDatabase(attachedDb1File, null);
+        SQLiteDatabase db2 = SQLiteDatabase.openOrCreateDatabase(attachedDb2File, null);
+
+        db1.execSQL("CREATE TABLE test (i int, j int);");
+        db1.execSQL("INSERT INTO test values(1,1);");
+        db1.close();
+
+        db2.execSQL("CREATE TABLE test (i int, j int);");
+        db2.execSQL("ATTACH DATABASE '" + attachedDb1File + "' AS db2;");
+        db2.execSQL("INSERT INTO test SELECT * FROM db2.test;"); // this crashes, although it should not
+        db2.close();
+    }
+
     @LargeTest
     @Test
     public void testDefaultDatabaseErrorHandler() {
